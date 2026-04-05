@@ -3,14 +3,14 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # permite lanzarlo manualmente con un clic
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar código
+      - name: Descargar codigo
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
@@ -19,7 +19,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Dar permisos a Gradle
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.6'
+
+      - name: Generar Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.6
+
+      - name: Dar permisos a gradlew
         run: chmod +x gradlew
 
       - name: Compilar APK de debug
