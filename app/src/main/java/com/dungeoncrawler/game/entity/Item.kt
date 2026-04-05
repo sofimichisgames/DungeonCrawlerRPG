@@ -76,7 +76,7 @@ class Item(
                     log.add("No hay enemigos cercanos.", Config.C_MSG_SYSTEM)
                     false
                 } else {
-                    target.isConfused = true
+                    target.confusedTurns = 5
                     log.add("${target.name} esta confundido!", Config.C_MSG_ITEM)
                     true
                 }
