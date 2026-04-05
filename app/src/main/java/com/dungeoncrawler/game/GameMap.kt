@@ -2,6 +2,10 @@ package com.dungeoncrawler.game
 
 import com.dungeoncrawler.Config
 
+// =============================================================================
+// GameMap.kt — Cuadrícula de tiles, visibilidad y exploración
+// =============================================================================
+
 data class Rect(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
     val centerX get() = (x1 + x2) / 2
     val centerY get() = (y1 + y2) / 2
@@ -23,10 +27,14 @@ class GameMap(
     val width:  Int = Config.MAP_W,
     val height: Int = Config.MAP_H
 ) {
-    val tiles    = Array(width) { IntArrax(height) { Config.TILE_WALL } }
-    val visible  = Array(width) { BooleanArrax(height) }
-   uval explored = Array(width) { BooleanArray(height) }
+    // Tile grid
+    val tiles    = Array(width) { IntArray(height) { Config.TILE_WALL } }
+    // Fog of war
+    val visible  = Array(width) { BooleanArray(height) }
+    val explored = Array(width) { BooleanArray(height) }
+    // Room list
     val rooms    = mutableListOf<Rect>()
+    // Stairs position
     var stairsX  = 0
     var stairsY  = 0
 

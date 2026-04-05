@@ -33,6 +33,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         isFocusableInTouchMode = true
     }
 
+    // ------------------------------------------------------------------
+    // SurfaceHolder callbacks
+    // ------------------------------------------------------------------
     override fun surfaceCreated(holder: SurfaceHolder) {
         engine.newGame()
         thread = GameThread(holder).also { it.start() }
@@ -49,6 +52,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         thread = null
     }
 
+    // ------------------------------------------------------------------
+    // Game Loop Thread
+    // ------------------------------------------------------------------
     inner class GameThread(private val surfaceHolder: SurfaceHolder) : Thread() {
         @Volatile var running = true
         private val targetFps = 60L
@@ -57,37 +63,60 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         override fun run() {
             while (running) {
                 val startMs = System.currentTimeMillis()
+
                 if (engine.needsRedraw) {
                     var canvas: Canvas? = null
                     try {
                         canvas = surfaceHolder.lockCanvas()
                         if (canvas != null) {
-                            synchronized(surfaceHolder) { renderer.render(canvas, engine, controls) }
+                            synchronized(surfaceHolder) {
+                                renderer.render(canvas, engine, controls)
+                            }
                             engine.needsRedraw = false
                         }
-                    } finally { canvas?.let { surfaceHolder.unlockCanvasAndPost(it) } }
+                    } finally {
+                        canvas?.let { surfaceHolder.unlockCanvasAndPost(it) }
+                    }
                 }
-                val sleep = frameDurationMs - (System.currentTimeMillis() - startMs)
+
+                val elapsed = System.currentTimeMillis() - startMs
+                val sleep   = frameDurationMs - elapsed
                 if (sleep > 0) sleep(sleep)
             }
         }
     }
 
+    // ------------------------------------------------------------------
+    // Touch input
+    // ------------------------------------------------------------------
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_DOWN) return true
-        val tx = event.x; val ty = event.y
+
+        val tx = event.x
+        val ty = event.y
+
         when (engine.state) {
-            Config.STATE_MENU, Config.STATE_GAME_OVER, Config.STATE_VICTORY -> { engine.newGame(); engine.needsRedraw = true; return true }
-            Config.STATE_INVENTORY -> { handleInventoryTouch(tx, ty); return true }
+            Config.STATE_MENU, Config.STATE_GAME_OVER, Config.STATE_VICTORY -> {
+                engine.newGame()
+                engine.needsRedraw = true
+                return true
+            }
+            Config.STATE_INVENTORY -> {
+                handleInventoryTouch(tx, ty)
+                return true
+            }
             Config.STATE_PLAYING -> {
                 val result = controls.handleTouch(tx, ty)
                 if (result != null && result.isMoveOrAction) {
                     when {
-                        result.openInventory -> { engine.state = Config.STATE_INVENTORY; engine.needsRedraw = true }
-                        result.pickUp -> engine.playerPickUp()
-                        result.descend -> engine.playerDescend()
-                        result.wait -> engine.playerWait()
-                        else -> engine.playerMove(result.dx, result.dy)
+                        result.openInventory -> {
+                            engine.state = Config.STATE_INVENTORY
+                            engine.needsRedraw = true
+                        }
+                        result.pickUp   -> engine.playerPickUp()
+                        result.descend  -> engine.playerDescend()
+                        result.wait     -> engine.playerWait()
+                        else            -> engine.playerMove(result.dx, result.dy)
                     }
                 }
             }
@@ -96,31 +125,61 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
     }
 
     private fun handleInventoryTouch(tx: Float, ty: Float) {
-        val sw = width.toFloat(); val sh = height.toFloat()
+        val sw = width.toFloat()
+        val sh = height.toFloat()
+        // Área de la ventana de inventario
         val ow = sw * 0.55f; val oh = sh * 0.75f
         val ox = (sw - ow) / 2f; val oy = (sh - oh) / 2f
-        if (tx < ox || tx > ox + ow || ty < oy || ty > oy + oh) { engine.state = Config.STATE_PLAYING; engine.needsRedraw = true; return }
-        val fs = oh * 0.05f; val startY = oy + fs * 4.3f; val lineH = fs * 1.25f
+
+        // Cerrar si toca fuera
+        if (tx < ox || tx > ox + ow || ty < oy || ty > oy + oh) {
+            engine.state = Config.STATE_PLAYING
+            engine.needsRedraw = true
+            return
+        }
+
+        // Detectar qué ítem se tocó por posición vertical
+        val fs    = oh * 0.05f
+        val startY = oy + fs * 4.3f
+        val lineH  = fs * 1.25f
         val idx = ((ty - startY) / lineH).toInt()
-        if (idx in engine.player.inventory.indices) engine.useInventoryItem(idx)
+        if (idx in engine.player.inventory.indices) {
+            engine.useInventoryItem(idx)
+        }
         engine.needsRedraw = true
     }
 
+    // ------------------------------------------------------------------
+    // Teclado físico (opcional, para emulador / teclado Bluetooth)
+    // ------------------------------------------------------------------
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (engine.state) {
-            Config.STATE_MENU, Config.STATE_GAME_OVER, Config.STATE_VICTORY -> { if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SPACE) { engine.newGame(); engine.needsRedraw = true } }
-            Config.STATE_PLAYING -> when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_W -> engine.playerMove(0,-1)
-                KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_S -> engine.playerMove(0,1)
-                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_A -> engine.playerMove(-1,0)
-                KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_D -> engine.playerMove(1,0)
-                KeyEvent.KEYCODE_SPACE -> engine.playerWait()
-                KeyEvent.KEYCODE_G -> engine.playerPickUp()
-                KeyEvent.KEYCODE_E, KeyEvent.KEYCODE_COMMA -> engine.playerDescend()
-                KeyEvent.KEYCODE_I -> { engine.state = Config.STATE_INVENTORY; engine.needsRedraw = true }
-                else -> return super.onKeyDown(keyCode, event)
+            Config.STATE_MENU, Config.STATE_GAME_OVER, Config.STATE_VICTORY -> {
+                if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SPACE) {
+                    engine.newGame(); engine.needsRedraw = true
+                }
             }
-            Config.STATE_INVENTORY -> { if (keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_BACK) { engine.state = Config.STATE_PLAYING; engine.needsRedraw = true } else { val idx = keyCode - KeyEvent.KEYCODE_A; if (idx in 0 until 26) engine.useInventoryItem(idx) } }
+            Config.STATE_PLAYING -> {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_UP,    KeyEvent.KEYCODE_W -> engine.playerMove(0, -1)
+                    KeyEvent.KEYCODE_DPAD_DOWN,  KeyEvent.KEYCODE_S -> engine.playerMove(0,  1)
+                    KeyEvent.KEYCODE_DPAD_LEFT,  KeyEvent.KEYCODE_A -> engine.playerMove(-1, 0)
+                    KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_D -> engine.playerMove( 1, 0)
+                    KeyEvent.KEYCODE_SPACE   -> engine.playerWait()
+                    KeyEvent.KEYCODE_G       -> engine.playerPickUp()
+                    KeyEvent.KEYCODE_E, KeyEvent.KEYCODE_COMMA -> engine.playerDescend()
+                    KeyEvent.KEYCODE_I       -> { engine.state = Config.STATE_INVENTORY; engine.needsRedraw = true }
+                    else -> return super.onKeyDown(keyCode, event)
+                }
+            }
+            Config.STATE_INVENTORY -> {
+                if (keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_BACK) {
+                    engine.state = Config.STATE_PLAYING; engine.needsRedraw = true
+                } else {
+                    val idx = keyCode - KeyEvent.KEYCODE_A
+                    if (idx in 0 until 26) engine.useInventoryItem(idx)
+                }
+            }
         }
         return true
     }

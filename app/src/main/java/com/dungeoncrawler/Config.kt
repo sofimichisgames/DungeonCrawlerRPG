@@ -76,7 +76,7 @@ object Config {
     val C_DEMON    = Color.rgb(230,  55,  55)
     val C_DRAGON   = Color.rgb(245, 155,  25)
 
-    // ítems
+    // Ítems
     val C_POTION  = Color.rgb(210,  80, 210)
     val C_SCROLL  = Color.rgb(210, 210,  55)
     val C_WEAPON  = Color.rgb(175, 220, 255)
