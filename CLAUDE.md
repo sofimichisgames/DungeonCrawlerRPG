@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Dungeon Crawler RPG** is an Android roguelike game written in Kotlin. The game features procedural dungeon generation, turn-based combat, inventory management, and progressive floor difficulty. After finishing work, **always push changes to GitHub** — this triggers a GitHub Actions pipeline that builds the APK.
+**Dungeon Crawler RPG** is an Android roguelike game written in Kotlin. The game features procedural dungeon generation, turn-based combat, inventory management, and progressive floor difficulty. Development uses local Gradle builds and direct ADB installation on connected devices.
 
 ---
 
@@ -13,14 +13,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Build Commands
 - **Assemble debug APK:** `./gradlew assembleDebug`
 - **Assemble release APK:** `./gradlew assembleRelease`
-- **Run on connected device:** `./gradlew installDebug` (requires device connected via USB with debugging enabled)
+- **Install to device (via adb):** `/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk`
+- **Launch app on device:** `/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity`
+- **View device logs:** `/c/Android/platform-tools/platform-tools/adb logcat | findstr dungeoncrawler`
 - **Lint check:** `./gradlew lint`
 
 ### Project Structure
-- **Build system:** Gradle 8.1.0 with Kotlin 1.9.0
+- **Build system:** Gradle 9.0 with AGP 8.7.0, Kotlin 2.0.0
+- **Java version:** **Java 21 LTS** (required - Java 26 has compatibility issues)
 - **Target SDK:** Android 34 (API level 34)
 - **Min SDK:** 24
-- **Java/JVM target:** 17
 - **APK output:** `app/build/outputs/apk/debug/app-debug.apk`
 
 ---
@@ -148,17 +150,93 @@ All game constants live here: map dimensions, tile types, states, item types, co
 
 ---
 
-## CI/CD & Deployment
+## Local Development Workflow
 
-After making changes, **push to GitHub** with:
+### Prerequisites & One-Time Setup
+
+1. **Java 21 LTS:** Download and install from [Eclipse Temurin](https://adoptium.net/) or [OpenJDK](https://jdk.java.net/21/)
+   - After installation, set `JAVA_HOME` environment variable
+   - Verify: `java -version` (should show 21.x.x)
+   - **⚠️ Important:** Java 26 has compatibility issues with the current AGP/Gradle version
+
+2. **Android SDK:** Ensure you have an Android SDK with API 34 installed at `C:\Android` (or set `ANDROID_HOME` env var)
+
+3. **ADB (Android Debug Bridge):** Installed with Android SDK at `/c/Android/platform-tools/platform-tools/adb`
+   - To add to PATH for easy access: `setx PATH "%PATH%;C:\Android\platform-tools\platform-tools"`
+
+4. **Accept SDK licenses:**
+   ```bash
+   /c/Android/platform-tools/platform-tools/adb shell echo "Licenses accepted"
+   ```
+   (or use `sdkmanager --licenses` from Android SDK cmdline-tools)
+
+5. **Create `local.properties`** in project root with:
+   ```
+   sdk.dir=C:\\Android
+   ```
+
+6. **Gradle version:** Already locked in `gradle/wrapper/gradle-wrapper.properties` to Gradle 9.0 (compatible with AGP 8.7.0)
+
+### Build & Test Workflow
+
+**Step 1: Build APK**
 ```bash
-git add -A
-git commit -m "Description of changes"
-git push origin main
+./gradlew clean assembleDebug
+```
+Output: `app/build/outputs/apk/debug/app-debug.apk`
+Typical build time: 2–3 minutes (faster for incremental builds)
+
+**Step 2: Verify device connection**
+```bash
+/c/Android/platform-tools/platform-tools/adb devices
+```
+Should show your device as "device" (not "offline" or "unauthorized")
+
+**Step 3: Install APK to device**
+```bash
+/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+The `-r` flag reinstalls if already installed. Should show "Success" on completion.
+
+**Step 4: Launch app on device**
+```bash
+/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity
 ```
 
-This triggers a GitHub Actions pipeline that:
-1. Builds the APK (debug & release)
-2. Stores output in artifacts
+**View device logs while testing:**
+```bash
+/c/Android/platform-tools/platform-tools/adb logcat | findstr "dungeoncrawler"
+```
 
-The pipeline is configured in `.github/workflows/` (not yet created, but expected).
+**Run linter before committing:**
+```bash
+./gradlew lint
+```
+
+### Typical Iteration Loop (Claude)
+1. Make code changes in Kotlin files
+2. Run: `./gradlew clean assembleDebug`
+3. Run: `/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk`
+4. Run: `/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity`
+5. Verify changes on device
+6. Repeat steps 1–5 as needed
+7. Commit when satisfied: `git add -A && git commit -m "..."`
+
+### Quick Deploy Script
+For rapid iteration, save this as `deploy.sh`:
+```bash
+#!/bin/bash
+./gradlew clean assembleDebug && \
+/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk && \
+/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity && \
+echo "✓ Deployed and launched!"
+```
+
+### Troubleshooting
+
+- **"JAVA_HOME is not set"** → Install Java 21 and set `JAVA_HOME=C:\Program Files\Java\jdk-21.0.10`
+- **"Java 26 incompatibility"** → Use Java 21 LTS instead. Java 26 causes "Unsupported class file major version 70" errors
+- **"adb: command not found"** → Use full path: `/c/Android/platform-tools/platform-tools/adb` or add to PATH
+- **"Device offline"** → Reconnect USB, enable USB debugging on device, run `adb kill-server && adb devices`
+- **"Activity does not exist"** → Ensure app package is `com.dungeoncrawler` and MainActivity is in correct location
+- **App crashes on device** → Check logs: `/c/Android/platform-tools/platform-tools/adb logcat | findstr "dungeoncrawler"`
