@@ -9,6 +9,7 @@ import android.view.SurfaceView
 import com.dungeoncrawler.game.GameEngine
 import com.dungeoncrawler.ui.Renderer
 import com.dungeoncrawler.ui.VirtualControls
+import com.dungeoncrawler.ui.BitmapManager
 
 // =============================================================================
 // GameView.kt — SurfaceView con game loop propio en un hilo dedicado
@@ -16,6 +17,7 @@ import com.dungeoncrawler.ui.VirtualControls
 class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback {
 
     private val engine   = GameEngine()
+    private val bitmapManager = BitmapManager()
     private val renderer: Renderer
     private val controls: VirtualControls
     private var thread: GameThread? = null
@@ -25,7 +27,11 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         val dm  = context.resources.displayMetrics
         val sw  = dm.widthPixels
         val sh  = dm.heightPixels
-        renderer = Renderer(sw, sh)
+
+        // Pre-load all item bitmaps before renderer initialization
+        bitmapManager.preloadAllItems()
+
+        renderer = Renderer(sw, sh, bitmapManager)
         controls = VirtualControls(sw, sh)
 
         holder.addCallback(this)
@@ -59,6 +65,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         @Volatile var running = true
         private val targetFps = 60L
         private val frameDurationMs = 1000L / targetFps
+        private var lastHeldMoveTime = 0L
+        private var lastHeldInputHash = 0
+        private val heldMoveDelayMs = 200L // Rate limit held moves to 5 per second
 
         override fun run() {
             while (running) {
@@ -67,13 +76,12 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
                 // Apply continuous held input (e.g., held direction arrow)
                 if (engine.state == Config.STATE_PLAYING) {
                     val heldInput = controls.getCurrentHeldInput()
-                    if (heldInput != null) {
+                    if (heldInput != null && startMs - lastHeldMoveTime >= heldMoveDelayMs) {
                         when {
                             heldInput.wait -> engine.playerWait()
-                            heldInput.dx != 0 || heldInput.dy != 0 -> {
-                                engine.playerMove(heldInput.dx, heldInput.dy)
-                            }
+                            heldInput.dx != 0 || heldInput.dy != 0 -> engine.playerMove(heldInput.dx, heldInput.dy)
                         }
+                        lastHeldMoveTime = startMs
                     }
                 }
 
@@ -127,7 +135,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
                                 result.pickUp   -> engine.playerPickUp()
                                 result.descend  -> engine.playerDescend()
                                 result.wait     -> engine.playerWait()
-                                else            -> engine.playerMove(result.dx, result.dy)
+                                else -> engine.playerMove(result.dx, result.dy) // Move immediately for instant feedback
                             }
                         }
                     }
@@ -135,11 +143,16 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
             }
             MotionEvent.ACTION_MOVE -> {
                 if (engine.state == Config.STATE_PLAYING) {
+                    // Only update held input on move, not on initial down
                     controls.updateTouchMove(tx, ty)
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 controls.releaseTouched()
+                // Clear held input to prevent double move
+                if (engine.state == Config.STATE_PLAYING) {
+                    controls.releaseTouched()
+                }
             }
         }
         return true
