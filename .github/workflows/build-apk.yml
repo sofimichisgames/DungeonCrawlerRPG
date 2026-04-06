@@ -41,6 +41,8 @@ jobs:
           retention-days: 30
 
       - name: Eliminar y crear Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest-build
@@ -50,5 +52,3 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
