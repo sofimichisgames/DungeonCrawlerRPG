@@ -117,8 +117,8 @@ class Renderer(sw: Int, sh: Int) {
                 if (!map.explored[mx][my]) continue
 
                 val vis = map.visible[mx][my]
-                val px = offX + mx * cell
-                val py = offY + my * cell
+                val px = offX + (mx.toFloat() * cell)
+                val py = offY + (my.toFloat() * cell)
 
                 when (map.tiles[mx][my]) {
                     Config.TILE_WALL -> {
@@ -149,21 +149,21 @@ class Renderer(sw: Int, sh: Int) {
         for (ent in engine.entities.sortedBy { it.renderOrder }) {
             if (!map.visible[ent.x][ent.y]) continue
 
-            val px = offX + ent.x * cell
-            val py = offY + ent.y * cell
+            val px = offX + (ent.x.toFloat() * cell)
+            val py = offY + (ent.y.toFloat() * cell)
 
             when (ent.char) {
                 '@' -> {
                     paint.color = Color.parseColor("#4169E1")
-                    canvas.drawCircle(px + cell/2, py + cell/2, cell/2.5f, paint)
+                    canvas.drawCircle(px + cell/2f, py + cell/2f, cell/2.5f, paint)
                 }
                 'E', 'o', 'G' -> {
                     paint.color = Color.parseColor("#DC143C")
-                    canvas.drawCircle(px + cell/2, py + cell/2, cell/2.8f, paint)
+                    canvas.drawCircle(px + cell/2f, py + cell/2f, cell/2.8f, paint)
                 }
                 else -> {
                     paint.color = ent.color
-                    canvas.drawCircle(px + cell/2, py + cell/2, cell/3.5f, paint)
+                    canvas.drawCircle(px + cell/2f, py + cell/2f, cell/3.5f, paint)
                 }
             }
         }
