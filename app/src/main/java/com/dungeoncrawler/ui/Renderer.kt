@@ -100,7 +100,7 @@ class Renderer(sw: Int, sh: Int) {
     }
     private fun mapCell(engine: GameEngine): Triple<Float,Float,Float> {
         val hudH = screenH * 0.08f
-        val ctrlH = screenH * 0.42f
+        val ctrlH = screenH * 0.30f
         val mapAreaH = screenH - hudH - ctrlH
         val cell = minOf(screenW / Config.MAP_W.toFloat(), mapAreaH / Config.MAP_H.toFloat())
         val offX = (screenW - cell * Config.MAP_W) / 2f
@@ -116,9 +116,9 @@ class Renderer(sw: Int, sh: Int) {
             val vis = map.visible[mx][my]
             val px = offX + mx*cell; val py = offY + my*cell + cell*0.85f
             when (map.tiles[mx][my]) {
-                Config.TILE_WALL   -> { paint.color = if (vis) Config.C_LIGHT_WALL  else Config.C_DARK_WALL;  canvas.drawText("#", px, py, paint) }
-                Config.TILE_FLOOR  -> { paint.color = if (vis) Config.C_LIGHT_FLOOR else Config.C_DARK_FLOOR; canvas.drawText(".", px, py, paint) }
-                Config.TILE_STAIRS -> { paint.color = if (vis) Config.C_STAIRS      else Config.C_DARK_FLOOR; canvas.drawText(">", px, py, paint) }
+                Config.TILE_WALL   -> { paint.color = if (vis) Config.C_LIGHT_WALL  else Config.C_DARK_WALL;  canvas.drawText("█", px, py, paint) }
+                Config.TILE_FLOOR  -> { paint.color = if (vis) Config.C_LIGHT_FLOOR else Config.C_DARK_FLOOR; canvas.drawText("·", px, py, paint) }
+                Config.TILE_STAIRS -> { paint.color = if (vis) Config.C_STAIRS      else Config.C_DARK_FLOOR; canvas.drawText("⬇", px, py, paint) }
             }
         }
     }
@@ -133,7 +133,7 @@ class Renderer(sw: Int, sh: Int) {
         }
     }
     private fun drawMessageLog(canvas: Canvas, engine: GameEngine) {
-        val ctrlH = screenH * 0.42f
+        val ctrlH = screenH * 0.30f
         val logBottom = screenH - ctrlH
         val fs = screenH * 0.022f; paint.textSize = fs
         val margin = screenW * 0.02f
