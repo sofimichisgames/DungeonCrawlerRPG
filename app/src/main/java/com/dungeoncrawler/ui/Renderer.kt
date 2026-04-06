@@ -3,13 +3,14 @@ package com.dungeoncrawler.ui
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Typeface
 import com.dungeoncrawler.Config
 import com.dungeoncrawler.game.GameEngine
 import com.dungeoncrawler.game.entity.Enemy
 import com.dungeoncrawler.game.entity.Item
 
-class Renderer(sw: Int, sh: Int) {
+class Renderer(sw: Int, sh: Int, private val bitmapManager: BitmapManager? = null) {
     private var screenW = sw.toFloat()
     private var screenH = sh.toFloat()
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -214,34 +215,136 @@ class Renderer(sw: Int, sh: Int) {
     }
     private fun drawInventory(canvas: Canvas, engine: GameEngine) {
         val p = engine.player
-        val ow = screenW*0.55f; val oh = screenH*0.75f
+        val ow = screenW*0.75f; val oh = screenH*0.75f
         val ox = (screenW-ow)/2f; val oy = (screenH-oh)/2f
-        paint.color = Config.C_UI_BG; canvas.drawRect(ox, oy, ox+ow, oy+oh, paint)
-        paint.color = Config.C_UI_BORDER; canvas.drawRect(ox, oy, ox+ow, oy+oh, paint)
-        val fs = oh*0.05f; val margin = ow*0.05f
-        paint.textSize = fs; paint.color = Config.C_HIGHLIGHT
-        canvas.drawText("INVENTARIO", ox+margin, oy+fs*1.5f, paint)
-        paint.color = Config.C_GRAY; paint.textSize = fs*0.7f
-        canvas.drawText("Atk:${p.atk}  Def:${p.def}  Oro:${p.gold}", ox+margin, oy+fs*2.5f, paint)
+
+        // Draw window background and border
+        paint.color = Config.C_UI_BG
+        canvas.drawRect(ox, oy, ox+ow, oy+oh, paint)
+        paint.color = Config.C_UI_BORDER
+        canvas.drawRect(ox, oy, ox+ow, oy+oh, paint)
+
+        val fs = oh*0.05f
+        val margin = ow*0.05f
+        val gridCols = 3
+        val cellW = (ow - margin*2) / gridCols
+        val cellH = fs*2.2f
+
+        // Title
         paint.textSize = fs
-        val startY = oy+fs*4.3f; val lineH = fs*1.25f
+        paint.color = Config.C_HIGHLIGHT
+        canvas.drawText("INVENTARIO", ox+margin, oy+fs*1.5f, paint)
+
+        // Stats
+        paint.color = Config.C_GRAY
+        paint.textSize = fs*0.7f
+        canvas.drawText("Atk:${p.atk}  Def:${p.def}  Oro:${p.gold}", ox+margin, oy+fs*2.5f, paint)
+
+        // Grid items
+        val gridStartY = oy+fs*3.8f
         if (p.inventory.isEmpty()) {
-            paint.color = Config.C_GRAY; canvas.drawText("(vacio)", ox+margin, startY, paint)
+            paint.color = Config.C_GRAY
+            paint.textSize = fs*0.8f
+            canvas.drawText("(vacio)", ox+margin, gridStartY+fs, paint)
         } else {
-            p.inventory.forEachIndexed { i, item ->
-                val lbl = ('a'.code + i).toChar().toString() + ") "
-                paint.color = Config.C_HIGHLIGHT; canvas.drawText(lbl, ox+margin, startY+i*lineH, paint)
-                paint.color = item.color
-                canvas.drawText(item.char+" "+item.name, ox+margin+paint.measureText(lbl), startY+i*lineH, paint)
+            p.inventory.forEachIndexed { idx, item ->
+                val row = idx / gridCols
+                val col = idx % gridCols
+                val cellX = ox + margin + col * cellW
+                val cellY = gridStartY + row * cellH
+
+                // Cell border
+                paint.color = Config.C_UI_BORDER
+                canvas.drawRect(cellX, cellY, cellX+cellW-1, cellY+cellH-1, paint)
+
+                // Key letter
+                paint.textSize = fs*0.6f
+                paint.color = Config.C_HIGHLIGHT
+                val key = ('a'.code + idx).toChar().toString()
+                canvas.drawText(key, cellX+4f, cellY+fs*0.8f, paint)
+
+                // Draw icon (visual representation) - centered and larger
+                val iconX = cellX + cellW/2f - fs*1f
+                val iconY = cellY + cellH/2f - fs*1f
+                val iconSize = fs*2f
+                drawItemIcon(canvas, item, iconX, iconY, iconSize)
             }
         }
-        val equipY = oy+oh-fs*3.5f
-        paint.textSize = fs*0.8f
+
+        // Equipment info
+        val equipStartY = oy+oh-fs*2.5f
+        paint.textSize = fs*0.75f
         paint.color = Config.C_WEAPON
-        canvas.drawText("Arma: "+(p.equippedWeapon?.name ?: "ninguna"), ox+margin, equipY, paint)
+        canvas.drawText("Arma: "+(p.equippedWeapon?.name ?: "ninguna"), ox+margin, equipStartY, paint)
         paint.color = Config.C_ARMOR
-        canvas.drawText("Armadura: "+(p.equippedArmor?.name ?: "ninguna"), ox+margin, equipY+fs, paint)
-        paint.color = Config.C_GRAY; paint.textSize = fs*0.65f
-        canvas.drawText("Toca item para usar. Fuera para cerrar.", ox+margin, oy+oh-fs*0.5f, paint)
+        canvas.drawText("Armadura: "+(p.equippedArmor?.name ?: "ninguna"), ox+margin, equipStartY+fs*0.8f, paint)
+
+        // Instructions
+        paint.color = Config.C_GRAY
+        paint.textSize = fs*0.6f
+        canvas.drawText("Toca item para usar. Fuera para cerrar.", ox+margin, oy+oh-fs*0.3f, paint)
+    }
+
+    private fun drawItemIcon(canvas: Canvas, item: Item, x: Float, y: Float, size: Float) {
+        // Try to use bitmap from BitmapManager first
+        val bitmap = bitmapManager?.getBitmap(item.type)
+        if (bitmap != null) {
+            // Draw the bitmap, centered and scaled to fit the icon size
+            val bitmapSize = 48  // Our generated bitmaps are 48x48
+            val scale = size / bitmapSize
+            val offsetX = (size - (bitmapSize * scale)) / 2
+            val offsetY = (size - (bitmapSize * scale)) / 2
+            canvas.drawBitmap(bitmap, x + offsetX, y + offsetY, paint)
+            return
+        }
+
+        // Fallback: use procedural drawing if bitmap unavailable
+        val originalColor = paint.color
+        val originalStyle = paint.style
+        val originalStrokeWidth = paint.strokeWidth
+
+        paint.color = item.color
+        paint.style = Paint.Style.FILL
+
+        when (item.type) {
+            Config.ITEM_POTION_HP, Config.ITEM_POTION_STR -> {
+                // Potion: bottle filled with color
+                canvas.drawCircle(x+size*0.3f, y+size*0.6f, size*0.25f, paint)
+            }
+            Config.ITEM_SCROLL_LIGHTNING, Config.ITEM_SCROLL_FIREBALL, Config.ITEM_SCROLL_CONFUSE -> {
+                // Scroll: rectangle with horizontal lines
+                canvas.drawRect(x+size*0.1f, y+size*0.15f, x+size*0.5f, y+size*0.85f, paint)
+                paint.color = Config.C_UI_BG
+                paint.strokeWidth = size*0.06f
+                paint.style = Paint.Style.STROKE
+                canvas.drawLine(x+size*0.15f, y+size*0.35f, x+size*0.45f, y+size*0.35f, paint)
+                canvas.drawLine(x+size*0.15f, y+size*0.50f, x+size*0.45f, y+size*0.50f, paint)
+                canvas.drawLine(x+size*0.15f, y+size*0.65f, x+size*0.45f, y+size*0.65f, paint)
+            }
+            Config.ITEM_WEAPON_DAGGER, Config.ITEM_WEAPON_SWORD, Config.ITEM_WEAPON_AXE -> {
+                // Weapon: triangle pointing up (blade)
+                paint.color = item.color
+                paint.style = Paint.Style.FILL
+                val path = Path()
+                path.moveTo(x+size*0.25f, y)
+                path.lineTo(x+size*0.35f, y+size*0.7f)
+                path.lineTo(x+size*0.15f, y+size*0.7f)
+                path.close()
+                canvas.drawPath(path, paint)
+            }
+            Config.ITEM_ARMOR_LEATHER, Config.ITEM_ARMOR_CHAIN, Config.ITEM_ARMOR_PLATE -> {
+                // Armor: filled rectangle (shield)
+                canvas.drawRect(x+size*0.1f, y+size*0.1f, x+size*0.5f, y+size*0.9f, paint)
+            }
+            Config.ITEM_GOLD -> {
+                // Gold: filled circle
+                canvas.drawCircle(x+size*0.3f, y+size*0.5f, size*0.25f, paint)
+            }
+        }
+
+        // Restore paint state
+        paint.color = originalColor
+        paint.style = originalStyle
+        paint.strokeWidth = originalStrokeWidth
     }
 }

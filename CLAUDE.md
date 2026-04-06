@@ -10,13 +10,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Building & Running
 
-### Build Commands
-- **Assemble debug APK:** `./gradlew assembleDebug`
-- **Assemble release APK:** `./gradlew assembleRelease`
-- **Install to device (via adb):** `/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk`
-- **Launch app on device:** `/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity`
-- **View device logs:** `/c/Android/platform-tools/platform-tools/adb logcat | findstr dungeoncrawler`
+### Deploy Scripts (Recommended)
+
+**For development iteration (most common):**
+```bash
+bash build_and_deploy.sh
+```
+- Builds APK with Java 21
+- Installs to device
+- Launches app
+- Takes 1-2 minutes
+
+**For quick redeploy (after code changes, if APK is fresh):**
+```bash
+bash deploy.sh
+```
+- Skips build, uses existing APK
+- Fast reinstall (10-15 seconds)
+- Perfect for testing UI/logic changes quickly
+
+### Manual Commands
+- **Build APK only:** `./gradlew assembleDebug`
+- **View logs:** `/c/Android/platform-tools/platform-tools/adb logcat | findstr dungeoncrawler`
 - **Lint check:** `./gradlew lint`
+- **Release APK:** `./gradlew assembleRelease`
 
 ### Project Structure
 - **Build system:** Gradle 9.0 with AGP 8.7.0, Kotlin 2.0.0
@@ -177,60 +194,71 @@ All game constants live here: map dimensions, tile types, states, item types, co
 
 6. **Gradle version:** Already locked in `gradle/wrapper/gradle-wrapper.properties` to Gradle 9.0 (compatible with AGP 8.7.0)
 
-### Build & Test Workflow
+### Detailed Build & Test Steps
 
-**Step 1: Build APK**
+**1. Build APK**
 ```bash
 ./gradlew clean assembleDebug
 ```
-Output: `app/build/outputs/apk/debug/app-debug.apk`
-Typical build time: 2–3 minutes (faster for incremental builds)
+- Output: `app/build/outputs/apk/debug/app-debug.apk`
+- Typical time: 2–3 minutes (faster for incremental builds)
 
-**Step 2: Verify device connection**
+**2. Verify device connection**
 ```bash
 /c/Android/platform-tools/platform-tools/adb devices
 ```
-Should show your device as "device" (not "offline" or "unauthorized")
+- Should show device as "device" (not "offline" or "unauthorized")
 
-**Step 3: Install APK to device**
+**3. Install APK**
 ```bash
 /c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
-The `-r` flag reinstalls if already installed. Should show "Success" on completion.
+- `-r` flag reinstalls if already present
+- Look for "Success" in output
 
-**Step 4: Launch app on device**
+**4. Launch app**
 ```bash
 /c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity
 ```
 
-**View device logs while testing:**
+**5. Monitor logs**
 ```bash
 /c/Android/platform-tools/platform-tools/adb logcat | findstr "dungeoncrawler"
 ```
 
-**Run linter before committing:**
+**Lint check (before committing)**
 ```bash
 ./gradlew lint
 ```
 
-### Typical Iteration Loop (Claude)
+### Typical Iteration Loop
 1. Make code changes in Kotlin files
-2. Run: `./gradlew clean assembleDebug`
-3. Run: `/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk`
-4. Run: `/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity`
-5. Verify changes on device
-6. Repeat steps 1–5 as needed
-7. Commit when satisfied: `git add -A && git commit -m "..."`
+2. **Build & deploy:** `bash build_and_deploy.sh` (1-2 min) or just `bash deploy.sh` if APK is fresh (10 sec)
+3. Verify changes on device
+4. For quick iterations: repeat steps 1-2 with `deploy.sh`
+5. Check logs if needed: `/c/Android/platform-tools/platform-tools/adb logcat | findstr dungeoncrawler`
+6. Commit when satisfied: `git add -A && git commit -m "..."`
 
-### Quick Deploy Script
-For rapid iteration, save this as `deploy.sh`:
-```bash
-#!/bin/bash
-./gradlew clean assembleDebug && \
-/c/Android/platform-tools/platform-tools/adb install -r app/build/outputs/apk/debug/app-debug.apk && \
-/c/Android/platform-tools/platform-tools/adb shell am start -n com.dungeoncrawler/.MainActivity && \
-echo "✓ Deployed and launched!"
-```
+### Deploy Scripts Summary
+
+**`build_and_deploy.sh`** — Full build + install + launch
+- Sets JAVA_HOME to Java 21
+- Stops Gradle daemon (avoids Java 26 issues)
+- Builds APK from scratch
+- Installs and launches
+- **Use when:** Making code changes
+
+**`deploy.sh`** — Fast redeploy (no rebuild)
+- Skips build, uses existing APK
+- Removes old version and installs new
+- Launches app
+- ~10-15 seconds
+- **Use when:** Testing quick changes after recent build
+
+Both scripts require:
+- Device connected via USB
+- USB debugging enabled
+- `/c/Android/platform-tools/platform-tools/adb` accessible
 
 ### Troubleshooting
 

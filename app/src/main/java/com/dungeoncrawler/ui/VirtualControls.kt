@@ -55,16 +55,8 @@ class VirtualControls(sw: Int, sh: Int) {
 
     fun handleTouch(tx: Float, ty: Float): TouchResult? {
         val result = handleTouchInternal(tx, ty)
-        // Update held input for D-pad directions only (not action buttons)
-        currentHeldInput = if (result != null && result.isMoveOrAction) {
-            if (!result.openInventory && !result.pickUp && !result.descend) {
-                HeldInput(dx = result.dx, dy = result.dy, wait = result.wait)
-            } else {
-                null
-            }
-        } else {
-            null
-        }
+        // Don't set held input on initial touch, only detect the action
+        // Held input will be set on ACTION_MOVE
         return result
     }
 

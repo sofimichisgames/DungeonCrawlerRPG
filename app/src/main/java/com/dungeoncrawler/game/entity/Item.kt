@@ -23,7 +23,10 @@ class Item(
         Config.ITEM_WEAPON_WARHAMMER
     )
     val isArmor: Boolean get() = type in listOf(
-        Config.ITEM_ARMOR_LEATHER, Config.ITEM_ARMOR_CHAIN, Config.ITEM_ARMOR_PLATE
+        Config.ITEM_ARMOR_LEATHER, Config.ITEM_ARMOR_HIDE, Config.ITEM_ARMOR_CHAIN,
+        Config.ITEM_ARMOR_SCALE, Config.ITEM_ARMOR_PLATE, Config.ITEM_ARMOR_SPLINT,
+        Config.ITEM_ARMOR_FULL_PLATE, Config.ITEM_ARMOR_MITHRIL, Config.ITEM_ARMOR_DRAGON,
+        Config.ITEM_ARMOR_CRYSTAL
     )
     val isPotion: Boolean get() = type in listOf(Config.ITEM_POTION_HP, Config.ITEM_POTION_STR)
     val isScroll: Boolean get() = type in listOf(
@@ -148,11 +151,32 @@ class Item(
                 Config.ITEM_ARMOR_LEATHER -> Item(
                     x, y, "[", Config.C_ARMOR, "Armadura de Cuero", type, defBonus = 1
                 )
+                Config.ITEM_ARMOR_HIDE -> Item(
+                    x, y, "[", Config.C_ARMOR, "Armadura de Cuero Curtido", type, defBonus = 2
+                )
                 Config.ITEM_ARMOR_CHAIN -> Item(
                     x, y, "[", Config.C_ARMOR, "Cota de Malla", type, defBonus = 3
                 )
+                Config.ITEM_ARMOR_SCALE -> Item(
+                    x, y, "[", Config.C_ARMOR, "Armadura de Escamas", type, defBonus = 4
+                )
                 Config.ITEM_ARMOR_PLATE -> Item(
                     x, y, "[", Config.C_ARMOR, "Armadura de Placas", type, defBonus = 5
+                )
+                Config.ITEM_ARMOR_SPLINT -> Item(
+                    x, y, "[", Config.C_ARMOR, "Armadura de Láminas", type, defBonus = 6
+                )
+                Config.ITEM_ARMOR_FULL_PLATE -> Item(
+                    x, y, "[", Config.C_ARMOR, "Armadura Completa", type, defBonus = 7
+                )
+                Config.ITEM_ARMOR_MITHRIL -> Item(
+                    x, y, "[", Config.C_ARMOR, "Armadura de Mithril", type, defBonus = 8
+                )
+                Config.ITEM_ARMOR_DRAGON -> Item(
+                    x, y, "[", Config.C_ARMOR, "Escamas de Dragón", type, defBonus = 9
+                )
+                Config.ITEM_ARMOR_CRYSTAL -> Item(
+                    x, y, "[", Config.C_ARMOR, "Armadura de Cristal", type, defBonus = 10
                 )
                 Config.ITEM_GOLD -> Item(
                     x, y, "$", Config.C_GOLD, "Monedas de Oro", type,

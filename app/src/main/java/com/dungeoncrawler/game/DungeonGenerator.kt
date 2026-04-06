@@ -127,87 +127,87 @@ class DungeonGenerator {
                 Config.ITEM_POTION_HP to 10, Config.ITEM_POTION_STR to 15,
                 Config.ITEM_SCROLL_FIREBALL to 8, Config.ITEM_SCROLL_CONFUSE to 8,
                 Config.ITEM_WEAPON_GREATSWORD to 25, Config.ITEM_WEAPON_WARHAMMER to 15,
-                Config.ITEM_ARMOR_PLATE to 10, Config.ITEM_GOLD to 9)
+                Config.ITEM_ARMOR_CRYSTAL to 8, Config.ITEM_ARMOR_DRAGON to 8, Config.ITEM_ARMOR_MITHRIL to 10, Config.ITEM_GOLD to 9)
             floor >= 42 -> listOf(
                 Config.ITEM_POTION_HP to 12, Config.ITEM_POTION_STR to 14,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_CONFUSE to 8,
                 Config.ITEM_WEAPON_GREATSWORD to 22, Config.ITEM_WEAPON_WARHAMMER to 15,
-                Config.ITEM_WEAPON_HALBERD to 8, Config.ITEM_ARMOR_PLATE to 10, Config.ITEM_GOLD to 11)
+                Config.ITEM_WEAPON_HALBERD to 8, Config.ITEM_ARMOR_DRAGON to 7, Config.ITEM_ARMOR_MITHRIL to 8, Config.ITEM_ARMOR_FULL_PLATE to 8, Config.ITEM_GOLD to 11)
             floor >= 38 -> listOf(
                 Config.ITEM_POTION_HP to 14, Config.ITEM_POTION_STR to 12,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_CONFUSE to 8,
                 Config.ITEM_WEAPON_GREATSWORD to 18, Config.ITEM_WEAPON_WARHAMMER to 16,
-                Config.ITEM_WEAPON_HALBERD to 10, Config.ITEM_ARMOR_PLATE to 12, Config.ITEM_GOLD to 10)
+                Config.ITEM_WEAPON_HALBERD to 10, Config.ITEM_ARMOR_MITHRIL to 8, Config.ITEM_ARMOR_FULL_PLATE to 10, Config.ITEM_GOLD to 10)
             floor >= 35 -> listOf(
                 Config.ITEM_POTION_HP to 15, Config.ITEM_POTION_STR to 12,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_CONFUSE to 8,
                 Config.ITEM_WEAPON_GREATSWORD to 14, Config.ITEM_WEAPON_WARHAMMER to 18,
-                Config.ITEM_WEAPON_HALBERD to 12, Config.ITEM_ARMOR_PLATE to 12, Config.ITEM_GOLD to 9)
+                Config.ITEM_WEAPON_HALBERD to 12, Config.ITEM_ARMOR_FULL_PLATE to 10, Config.ITEM_ARMOR_SPLINT to 8, Config.ITEM_GOLD to 9)
             floor >= 32 -> listOf(
                 Config.ITEM_POTION_HP to 16, Config.ITEM_POTION_STR to 11,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_CONFUSE to 7,
                 Config.ITEM_WEAPON_WARHAMMER to 16, Config.ITEM_WEAPON_HALBERD to 14,
-                Config.ITEM_WEAPON_MACE to 10, Config.ITEM_ARMOR_PLATE to 12, Config.ITEM_GOLD to 8)
+                Config.ITEM_WEAPON_MACE to 10, Config.ITEM_ARMOR_FULL_PLATE to 10, Config.ITEM_ARMOR_SPLINT to 10, Config.ITEM_GOLD to 8)
             floor >= 28 -> listOf(
                 Config.ITEM_POTION_HP to 17, Config.ITEM_POTION_STR to 10,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_LIGHTNING to 8,
                 Config.ITEM_WEAPON_HALBERD to 16, Config.ITEM_WEAPON_WARHAMMER to 14,
-                Config.ITEM_WEAPON_MACE to 12, Config.ITEM_ARMOR_CHAIN to 8, Config.ITEM_ARMOR_PLATE to 10, Config.ITEM_GOLD to 9)
+                Config.ITEM_WEAPON_MACE to 12, Config.ITEM_ARMOR_SPLINT to 10, Config.ITEM_ARMOR_SCALE to 8, Config.ITEM_GOLD to 9)
             floor >= 25 -> listOf(
                 Config.ITEM_POTION_HP to 18, Config.ITEM_POTION_STR to 10,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_LIGHTNING to 8,
                 Config.ITEM_WEAPON_HALBERD to 14, Config.ITEM_WEAPON_MACE to 14,
-                Config.ITEM_WEAPON_AXE to 10, Config.ITEM_ARMOR_CHAIN to 10, Config.ITEM_ARMOR_PLATE to 8, Config.ITEM_GOLD to 8)
+                Config.ITEM_WEAPON_AXE to 10, Config.ITEM_ARMOR_SPLINT to 8, Config.ITEM_ARMOR_SCALE to 10, Config.ITEM_GOLD to 8)
             floor >= 22 -> listOf(
                 Config.ITEM_POTION_HP to 19, Config.ITEM_POTION_STR to 9,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_LIGHTNING to 8,
                 Config.ITEM_WEAPON_MACE to 14, Config.ITEM_WEAPON_HALBERD to 12,
-                Config.ITEM_WEAPON_SCIMITAR to 10, Config.ITEM_WEAPON_AXE to 8, Config.ITEM_ARMOR_CHAIN to 12, Config.ITEM_GOLD to 8)
+                Config.ITEM_WEAPON_SCIMITAR to 10, Config.ITEM_WEAPON_AXE to 8, Config.ITEM_ARMOR_SPLINT to 10, Config.ITEM_ARMOR_SCALE to 10, Config.ITEM_GOLD to 8)
             floor >= 20 -> listOf(
                 Config.ITEM_POTION_HP to 20, Config.ITEM_POTION_STR to 9,
                 Config.ITEM_SCROLL_FIREBALL to 10, Config.ITEM_SCROLL_LIGHTNING to 8,
                 Config.ITEM_WEAPON_MACE to 16, Config.ITEM_WEAPON_SCIMITAR to 10,
-                Config.ITEM_WEAPON_AXE to 8, Config.ITEM_ARMOR_CHAIN to 12, Config.ITEM_GOLD to 7)
+                Config.ITEM_WEAPON_AXE to 8, Config.ITEM_ARMOR_SCALE to 12, Config.ITEM_ARMOR_SPLINT to 8, Config.ITEM_GOLD to 7)
             floor >= 17 -> listOf(
                 Config.ITEM_POTION_HP to 21, Config.ITEM_SCROLL_FIREBALL to 10,
                 Config.ITEM_SCROLL_LIGHTNING to 8, Config.ITEM_WEAPON_AXE to 14,
                 Config.ITEM_WEAPON_SCIMITAR to 12, Config.ITEM_WEAPON_MACE to 12,
-                Config.ITEM_WEAPON_SPEAR to 10, Config.ITEM_ARMOR_CHAIN to 10, Config.ITEM_GOLD to 7)
+                Config.ITEM_WEAPON_SPEAR to 10, Config.ITEM_ARMOR_SCALE to 10, Config.ITEM_ARMOR_HIDE to 8, Config.ITEM_GOLD to 7)
             floor >= 14 -> listOf(
                 Config.ITEM_POTION_HP to 22, Config.ITEM_SCROLL_LIGHTNING to 10,
                 Config.ITEM_SCROLL_FIREBALL to 8, Config.ITEM_WEAPON_SCIMITAR to 14,
                 Config.ITEM_WEAPON_AXE to 12, Config.ITEM_WEAPON_SPEAR to 10,
-                Config.ITEM_ARMOR_CHAIN to 12, Config.ITEM_ARMOR_LEATHER to 8, Config.ITEM_GOLD to 4)
+                Config.ITEM_ARMOR_SCALE to 10, Config.ITEM_ARMOR_HIDE to 12, Config.ITEM_GOLD to 4)
             floor >= 12 -> listOf(
                 Config.ITEM_POTION_HP to 24, Config.ITEM_SCROLL_LIGHTNING to 10,
                 Config.ITEM_WEAPON_AXE to 14, Config.ITEM_WEAPON_SWORD to 12,
-                Config.ITEM_WEAPON_SPEAR to 10, Config.ITEM_ARMOR_CHAIN to 12,
-                Config.ITEM_ARMOR_LEATHER to 10, Config.ITEM_GOLD to 8)
+                Config.ITEM_WEAPON_SPEAR to 10, Config.ITEM_ARMOR_SCALE to 12,
+                Config.ITEM_ARMOR_HIDE to 12, Config.ITEM_GOLD to 8)
             floor >= 10 -> listOf(
                 Config.ITEM_POTION_HP to 26, Config.ITEM_SCROLL_LIGHTNING to 10,
                 Config.ITEM_WEAPON_SWORD to 14, Config.ITEM_WEAPON_AXE to 12,
-                Config.ITEM_WEAPON_SPEAR to 10, Config.ITEM_ARMOR_CHAIN to 10,
-                Config.ITEM_ARMOR_LEATHER to 10, Config.ITEM_GOLD to 8)
+                Config.ITEM_WEAPON_SPEAR to 10, Config.ITEM_ARMOR_SCALE to 10,
+                Config.ITEM_ARMOR_HIDE to 10, Config.ITEM_GOLD to 8)
             floor >= 8 -> listOf(
                 Config.ITEM_POTION_HP to 28, Config.ITEM_SCROLL_LIGHTNING to 10,
                 Config.ITEM_WEAPON_SWORD to 14, Config.ITEM_WEAPON_BOW to 10,
-                Config.ITEM_WEAPON_SPEAR to 8, Config.ITEM_ARMOR_CHAIN to 10,
-                Config.ITEM_ARMOR_LEATHER to 12, Config.ITEM_GOLD to 8)
+                Config.ITEM_WEAPON_SPEAR to 8, Config.ITEM_ARMOR_SCALE to 8,
+                Config.ITEM_ARMOR_HIDE to 14, Config.ITEM_GOLD to 8)
             floor >= 6 -> listOf(
                 Config.ITEM_POTION_HP to 30, Config.ITEM_SCROLL_LIGHTNING to 10,
                 Config.ITEM_WEAPON_SWORD to 14, Config.ITEM_WEAPON_BOW to 10,
-                Config.ITEM_ARMOR_LEATHER to 14, Config.ITEM_ARMOR_CHAIN to 8,
+                Config.ITEM_ARMOR_HIDE to 14, Config.ITEM_ARMOR_SCALE to 8,
                 Config.ITEM_GOLD to 14)
             floor >= 4 -> listOf(
                 Config.ITEM_POTION_HP to 34, Config.ITEM_SCROLL_LIGHTNING to 8,
                 Config.ITEM_WEAPON_SWORD to 12, Config.ITEM_WEAPON_BOW to 8,
-                Config.ITEM_ARMOR_LEATHER to 16, Config.ITEM_GOLD to 22)
+                Config.ITEM_ARMOR_HIDE to 16, Config.ITEM_ARMOR_LEATHER to 8, Config.ITEM_GOLD to 22)
             floor >= 2 -> listOf(
                 Config.ITEM_POTION_HP to 40, Config.ITEM_WEAPON_DAGGER to 10,
-                Config.ITEM_ARMOR_LEATHER to 14, Config.ITEM_GOLD to 36)
+                Config.ITEM_ARMOR_HIDE to 12, Config.ITEM_ARMOR_LEATHER to 8, Config.ITEM_GOLD to 36)
             else       -> listOf(
                 Config.ITEM_POTION_HP to 45, Config.ITEM_WEAPON_DAGGER to 12,
-                Config.ITEM_ARMOR_LEATHER to 13, Config.ITEM_GOLD to 30)
+                Config.ITEM_ARMOR_HIDE to 10, Config.ITEM_ARMOR_LEATHER to 12, Config.ITEM_GOLD to 30)
         }
         return weightedPick(table)
     }

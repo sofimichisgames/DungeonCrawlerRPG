@@ -66,8 +66,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         private val targetFps = 60L
         private val frameDurationMs = 1000L / targetFps
         private var lastHeldMoveTime = 0L
+        private var heldInputStartTime = 0L
         private var lastHeldInputHash = 0
-        private val heldMoveDelayMs = 200L // Rate limit held moves to 5 per second
+        private val heldMoveStartDelayMs = 1000L // Wait 1 sec before repeating
+        private val heldMoveDelayMs = 500L // Rate limit held moves to 2 per second
 
         override fun run() {
             while (running) {
@@ -76,12 +78,25 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
                 // Apply continuous held input (e.g., held direction arrow)
                 if (engine.state == Config.STATE_PLAYING) {
                     val heldInput = controls.getCurrentHeldInput()
-                    if (heldInput != null && startMs - lastHeldMoveTime >= heldMoveDelayMs) {
-                        when {
-                            heldInput.wait -> engine.playerWait()
-                            heldInput.dx != 0 || heldInput.dy != 0 -> engine.playerMove(heldInput.dx, heldInput.dy)
+                    if (heldInput != null) {
+                        val inputHash = (heldInput.dx * 31 + heldInput.dy).hashCode() xor heldInput.wait.hashCode()
+                        // Reset timer if input changed
+                        if (inputHash != lastHeldInputHash) {
+                            heldInputStartTime = startMs
+                            lastHeldInputHash = inputHash
                         }
-                        lastHeldMoveTime = startMs
+                        // Only trigger repeating moves after 1 sec of holding, then every 500ms
+                        if (startMs - heldInputStartTime >= heldMoveStartDelayMs && startMs - lastHeldMoveTime >= heldMoveDelayMs) {
+                            when {
+                                heldInput.wait -> engine.playerWait()
+                                heldInput.dx != 0 || heldInput.dy != 0 -> engine.playerMove(heldInput.dx, heldInput.dy)
+                            }
+                            lastHeldMoveTime = startMs
+                        }
+                    } else {
+                        // Input released, reset state
+                        heldInputStartTime = 0L
+                        lastHeldInputHash = 0
                     }
                 }
 

@@ -47,8 +47,15 @@ object Config {
     const val ITEM_WEAPON_BOW      = "bow"
     const val ITEM_WEAPON_WARHAMMER = "warhammer"
     const val ITEM_ARMOR_LEATHER   = "leather"
+    const val ITEM_ARMOR_HIDE      = "hide"
     const val ITEM_ARMOR_CHAIN     = "chain"
+    const val ITEM_ARMOR_SCALE     = "scale"
     const val ITEM_ARMOR_PLATE     = "plate"
+    const val ITEM_ARMOR_SPLINT    = "splint"
+    const val ITEM_ARMOR_FULL_PLATE= "full_plate"
+    const val ITEM_ARMOR_MITHRIL   = "mithril"
+    const val ITEM_ARMOR_DRAGON    = "dragon"
+    const val ITEM_ARMOR_CRYSTAL   = "crystal"
     const val ITEM_GOLD            = "gold"
 
     // --- XP ---
