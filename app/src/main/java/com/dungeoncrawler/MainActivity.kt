@@ -1,13 +1,13 @@
 package com.dungeoncrawler
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
 
 // =============================================================================
 // MainActivity.kt — Punto de entrada de la aplicación
 // =============================================================================
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
     private lateinit var gameView: GameView
 
