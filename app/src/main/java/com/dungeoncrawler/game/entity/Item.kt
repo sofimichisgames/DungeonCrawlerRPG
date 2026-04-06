@@ -17,7 +17,10 @@ class Item(
 ) : Entity(x, y, char, color, name, blocks = false) {
 
     val isWeapon: Boolean get() = type in listOf(
-        Config.ITEM_WEAPON_DAGGER, Config.ITEM_WEAPON_SWORD, Config.ITEM_WEAPON_AXE
+        Config.ITEM_WEAPON_DAGGER, Config.ITEM_WEAPON_SWORD, Config.ITEM_WEAPON_AXE,
+        Config.ITEM_WEAPON_MACE, Config.ITEM_WEAPON_SPEAR, Config.ITEM_WEAPON_HALBERD,
+        Config.ITEM_WEAPON_GREATSWORD, Config.ITEM_WEAPON_SCIMITAR, Config.ITEM_WEAPON_BOW,
+        Config.ITEM_WEAPON_WARHAMMER
     )
     val isArmor: Boolean get() = type in listOf(
         Config.ITEM_ARMOR_LEATHER, Config.ITEM_ARMOR_CHAIN, Config.ITEM_ARMOR_PLATE
@@ -120,6 +123,27 @@ class Item(
                 )
                 Config.ITEM_WEAPON_AXE -> Item(
                     x, y, "/", Config.C_WEAPON, "Hacha", type, atkBonus = 6
+                )
+                Config.ITEM_WEAPON_MACE -> Item(
+                    x, y, "/", Config.C_WEAPON, "Maza", type, atkBonus = 7
+                )
+                Config.ITEM_WEAPON_SPEAR -> Item(
+                    x, y, "/", Config.C_WEAPON, "Lanza", type, atkBonus = 5
+                )
+                Config.ITEM_WEAPON_HALBERD -> Item(
+                    x, y, "/", Config.C_WEAPON, "Alabarda", type, atkBonus = 8
+                )
+                Config.ITEM_WEAPON_GREATSWORD -> Item(
+                    x, y, "/", Config.C_WEAPON, "Gran Espada", type, atkBonus = 10
+                )
+                Config.ITEM_WEAPON_SCIMITAR -> Item(
+                    x, y, "/", Config.C_WEAPON, "Cimitarra", type, atkBonus = 6
+                )
+                Config.ITEM_WEAPON_BOW -> Item(
+                    x, y, "/", Config.C_WEAPON, "Arco", type, atkBonus = 5
+                )
+                Config.ITEM_WEAPON_WARHAMMER -> Item(
+                    x, y, "/", Config.C_WEAPON, "Martillo de Guerra", type, atkBonus = 9
                 )
                 Config.ITEM_ARMOR_LEATHER -> Item(
                     x, y, "[", Config.C_ARMOR, "Armadura de Cuero", type, defBonus = 1
