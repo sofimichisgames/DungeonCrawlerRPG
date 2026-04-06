@@ -1,6 +1,7 @@
 package com.dungeoncrawler.ui
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import com.dungeoncrawler.Config
@@ -110,26 +111,61 @@ class Renderer(sw: Int, sh: Int) {
     private fun drawMap(canvas: Canvas, engine: GameEngine) {
         val map = engine.gameMap
         val (offX, offY, cell) = mapCell(engine)
-        paint.textSize = cell * 0.85f
-        for (mx in 0 until Config.MAP_W) for (my in 0 until Config.MAP_H) {
-            if (!map.explored[mx][my]) continue
-            val vis = map.visible[mx][my]
-            val px = offX + mx*cell; val py = offY + my*cell + cell*0.85f
-            when (map.tiles[mx][my]) {
-                Config.TILE_WALL   -> { paint.color = if (vis) Config.C_LIGHT_WALL  else Config.C_DARK_WALL;  canvas.drawText("█", px, py, paint) }
-                Config.TILE_FLOOR  -> { paint.color = if (vis) Config.C_LIGHT_FLOOR else Config.C_DARK_FLOOR; canvas.drawText("·", px, py, paint) }
-                Config.TILE_STAIRS -> { paint.color = if (vis) Config.C_STAIRS      else Config.C_DARK_FLOOR; canvas.drawText("⬇", px, py, paint) }
+
+        for (mx in 0 until Config.MAP_W) {
+            for (my in 0 until Config.MAP_H) {
+                if (!map.explored[mx][my]) continue
+
+                val vis = map.visible[mx][my]
+                val px = offX + mx * cell
+                val py = offY + my * cell
+
+                when (map.tiles[mx][my]) {
+                    Config.TILE_WALL -> {
+                        paint.color = if (vis) Config.C_LIGHT_WALL else Config.C_DARK_WALL
+                        canvas.drawRect(px, py, px + cell, py + cell, paint)
+                        paint.style = Paint.Style.STROKE
+                        paint.strokeWidth = 2f
+                        paint.color = Color.parseColor("#696969")
+                        canvas.drawRect(px, py, px + cell, py + cell, paint)
+                        paint.style = Paint.Style.FILL
+                    }
+                    Config.TILE_FLOOR -> {
+                        paint.color = if (vis) Config.C_LIGHT_FLOOR else Config.C_DARK_FLOOR
+                        canvas.drawRect(px, py, px + cell, py + cell, paint)
+                    }
+                    Config.TILE_STAIRS -> {
+                        paint.color = if (vis) Config.C_STAIRS else Config.C_DARK_FLOOR
+                        canvas.drawRect(px, py, px + cell, py + cell, paint)
+                    }
+                }
             }
         }
     }
     private fun drawEntities(canvas: Canvas, engine: GameEngine) {
         val map = engine.gameMap
         val (offX, offY, cell) = mapCell(engine)
-        paint.textSize = cell * 0.85f
+
         for (ent in engine.entities.sortedBy { it.renderOrder }) {
             if (!map.visible[ent.x][ent.y]) continue
-            paint.color = ent.color
-            canvas.drawText(ent.char, offX + ent.x*cell, offY + ent.y*cell + cell*0.85f, paint)
+
+            val px = offX + ent.x * cell
+            val py = offY + ent.y * cell
+
+            when (ent.char) {
+                '@' -> {
+                    paint.color = Color.parseColor("#4169E1")
+                    canvas.drawCircle(px + cell/2, py + cell/2, cell/2.5f, paint)
+                }
+                'E', 'o', 'G' -> {
+                    paint.color = Color.parseColor("#DC143C")
+                    canvas.drawCircle(px + cell/2, py + cell/2, cell/2.8f, paint)
+                }
+                else -> {
+                    paint.color = ent.color
+                    canvas.drawCircle(px + cell/2, py + cell/2, cell/3.5f, paint)
+                }
+            }
         }
     }
     private fun drawMessageLog(canvas: Canvas, engine: GameEngine) {
