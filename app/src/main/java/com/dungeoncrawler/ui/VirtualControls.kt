@@ -15,16 +15,60 @@ class VirtualControls(sw: Int, sh: Int) {
         val wait: Boolean = false
     )
 
+    data class HeldInput(
+        val dx: Int = 0,
+        val dy: Int = 0,
+        val wait: Boolean = false
+    )
+
     // Zonas de botones (se actualizan con resize)
     private var screenW = sw.toFloat()
     private var screenH = sh.toFloat()
+
+    // Held touch tracking for continuous movement
+    private var currentHeldInput: HeldInput? = null
 
     fun resize(w: Int, h: Int) {
         screenW = w.toFloat()
         screenH = h.toFloat()
     }
 
+    fun getCurrentHeldInput(): HeldInput? = currentHeldInput
+
+    fun updateTouchMove(tx: Float, ty: Float) {
+        val result = handleTouchInternal(tx, ty)
+        // Only update held input for D-pad directions and wait; ignore action buttons
+        currentHeldInput = if (result != null && result.isMoveOrAction) {
+            if (!result.openInventory && !result.pickUp && !result.descend) {
+                HeldInput(dx = result.dx, dy = result.dy, wait = result.wait)
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+    }
+
+    fun releaseTouched() {
+        currentHeldInput = null
+    }
+
     fun handleTouch(tx: Float, ty: Float): TouchResult? {
+        val result = handleTouchInternal(tx, ty)
+        // Update held input for D-pad directions only (not action buttons)
+        currentHeldInput = if (result != null && result.isMoveOrAction) {
+            if (!result.openInventory && !result.pickUp && !result.descend) {
+                HeldInput(dx = result.dx, dy = result.dy, wait = result.wait)
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+        return result
+    }
+
+    private fun handleTouchInternal(tx: Float, ty: Float): TouchResult? {
         // El D-pad ocupa el tercio inferior izquierdo de la pantalla
         // Los botones de acción están en el tercio inferior derecho
         val padSize = screenW * 0.38f

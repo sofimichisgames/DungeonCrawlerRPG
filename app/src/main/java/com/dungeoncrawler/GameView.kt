@@ -64,6 +64,19 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
             while (running) {
                 val startMs = System.currentTimeMillis()
 
+                // Apply continuous held input (e.g., held direction arrow)
+                if (engine.state == Config.STATE_PLAYING) {
+                    val heldInput = controls.getCurrentHeldInput()
+                    if (heldInput != null) {
+                        when {
+                            heldInput.wait -> engine.playerWait()
+                            heldInput.dx != 0 || heldInput.dy != 0 -> {
+                                engine.playerMove(heldInput.dx, heldInput.dy)
+                            }
+                        }
+                    }
+                }
+
                 if (engine.needsRedraw) {
                     var canvas: Canvas? = null
                     try {
@@ -90,35 +103,43 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
     // Touch input
     // ------------------------------------------------------------------
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action != MotionEvent.ACTION_DOWN) return true
-
         val tx = event.x
         val ty = event.y
 
-        when (engine.state) {
-            Config.STATE_MENU, Config.STATE_GAME_OVER, Config.STATE_VICTORY -> {
-                engine.newGame()
-                engine.needsRedraw = true
-                return true
-            }
-            Config.STATE_INVENTORY -> {
-                handleInventoryTouch(tx, ty)
-                return true
-            }
-            Config.STATE_PLAYING -> {
-                val result = controls.handleTouch(tx, ty)
-                if (result != null && result.isMoveOrAction) {
-                    when {
-                        result.openInventory -> {
-                            engine.state = Config.STATE_INVENTORY
-                            engine.needsRedraw = true
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                when (engine.state) {
+                    Config.STATE_MENU, Config.STATE_GAME_OVER, Config.STATE_VICTORY -> {
+                        engine.newGame()
+                        engine.needsRedraw = true
+                    }
+                    Config.STATE_INVENTORY -> {
+                        handleInventoryTouch(tx, ty)
+                    }
+                    Config.STATE_PLAYING -> {
+                        val result = controls.handleTouch(tx, ty)
+                        if (result != null && result.isMoveOrAction) {
+                            when {
+                                result.openInventory -> {
+                                    engine.state = Config.STATE_INVENTORY
+                                    engine.needsRedraw = true
+                                }
+                                result.pickUp   -> engine.playerPickUp()
+                                result.descend  -> engine.playerDescend()
+                                result.wait     -> engine.playerWait()
+                                else            -> engine.playerMove(result.dx, result.dy)
+                            }
                         }
-                        result.pickUp   -> engine.playerPickUp()
-                        result.descend  -> engine.playerDescend()
-                        result.wait     -> engine.playerWait()
-                        else            -> engine.playerMove(result.dx, result.dy)
                     }
                 }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (engine.state == Config.STATE_PLAYING) {
+                    controls.updateTouchMove(tx, ty)
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                controls.releaseTouched()
             }
         }
         return true
@@ -128,7 +149,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
         val sw = width.toFloat()
         val sh = height.toFloat()
         // Área de la ventana de inventario
-        val ow = sw * 0.55f; val oh = sh * 0.75f
+        val ow = sw * 0.75f; val oh = sh * 0.80f
         val ox = (sw - ow) / 2f; val oy = (sh - oh) / 2f
 
         // Cerrar si toca fuera
@@ -138,13 +159,37 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
             return
         }
 
-        // Detectar qué ítem se tocó por posición vertical
-        val fs    = oh * 0.05f
-        val startY = oy + fs * 4.3f
-        val lineH  = fs * 1.25f
-        val idx = ((ty - startY) / lineH).toInt()
-        if (idx in engine.player.inventory.indices) {
-            engine.useInventoryItem(idx)
+        // Detectar qué ítem se tocó usando grid
+        val fs = oh * 0.045f
+        val margin = ow * 0.03f
+        val gridCols = 3
+        val gridStartY = oy + fs * 4.0f
+        val cellW = (ow - margin * 2) / gridCols
+        val cellH = fs * 2.5f
+
+        // Only process touches within grid area
+        if (ty < gridStartY) {
+            engine.needsRedraw = true
+            return
+        }
+
+        // Calculate grid position
+        val relX = tx - (ox + margin)
+        val relY = ty - gridStartY
+
+        if (relX < 0 || relY < 0) {
+            engine.needsRedraw = true
+            return
+        }
+
+        val col = (relX / cellW).toInt()
+        val row = (relY / cellH).toInt()
+
+        if (col >= 0 && col < gridCols) {
+            val idx = row * gridCols + col
+            if (idx in engine.player.inventory.indices) {
+                engine.useInventoryItem(idx)
+            }
         }
         engine.needsRedraw = true
     }
