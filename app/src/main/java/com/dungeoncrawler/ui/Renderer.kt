@@ -153,11 +153,11 @@ class Renderer(sw: Int, sh: Int) {
             val py = offY + (ent.y.toFloat() * cell)
 
             when (ent.char) {
-                '@' -> {
+                "@" -> {
                     paint.color = Color.parseColor("#4169E1")
                     canvas.drawCircle(px + cell/2f, py + cell/2f, cell/2.5f, paint)
                 }
-                'E', 'o', 'G' -> {
+                "E", "o", "G" -> {
                     paint.color = Color.parseColor("#DC143C")
                     canvas.drawCircle(px + cell/2f, py + cell/2f, cell/2.8f, paint)
                 }
