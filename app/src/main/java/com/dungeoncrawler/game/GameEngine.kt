@@ -1,6 +1,7 @@
 package com.dungeoncrawler.game
 
 import com.dungeoncrawler.Config
+import com.dungeoncrawler.audio.AudioManager
 import com.dungeoncrawler.game.entity.Enemy
 import com.dungeoncrawler.game.entity.Entity
 import com.dungeoncrawler.game.entity.Item
@@ -31,6 +32,7 @@ class GameEngine {
         messageLog.add("Toca el D-pad para moverte. INV para el inventario.", Config.C_MSG_SYSTEM)
         loadFloor()
         state = Config.STATE_PLAYING
+        AudioManager.playStateMusic(Config.STATE_PLAYING, currentFloor)
     }
 
     fun loadFloor() {
@@ -52,6 +54,7 @@ class GameEngine {
 
         FovSystem.compute(gameMap, player.x, player.y)
         messageLog.add("Piso $currentFloor: las sombras te rodean.", Config.C_MSG_SYSTEM)
+        AudioManager.playStateMusic(Config.STATE_PLAYING, currentFloor)
         needsRedraw = true
     }
 
@@ -89,6 +92,7 @@ class GameEngine {
             if (currentFloor >= Config.MAX_FLOOR) {
                 state = Config.STATE_VICTORY
                 messageLog.add("¡Has conquistado las mazmorras!", Config.C_MSG_SYSTEM)
+                AudioManager.playStateMusic(Config.STATE_VICTORY)
             } else {
                 currentFloor++
                 loadFloor()
@@ -113,6 +117,7 @@ class GameEngine {
         if (player.isDead) {
             state = Config.STATE_GAME_OVER
             messageLog.add("Has caído en las profundidades...", Config.C_MSG_DEATH)
+            AudioManager.playStateMusic(Config.STATE_GAME_OVER)
             needsRedraw = true
             return
         }
@@ -129,6 +134,7 @@ class GameEngine {
         if (player.isDead) {
             state = Config.STATE_GAME_OVER
             messageLog.add("Has caído en las profundidades...", Config.C_MSG_DEATH)
+            AudioManager.playStateMusic(Config.STATE_GAME_OVER)
         }
     }
 

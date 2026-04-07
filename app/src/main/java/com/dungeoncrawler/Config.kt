@@ -65,6 +65,32 @@ object Config {
     // --- Inventario ---
     const val MAX_INVENTORY = 26
 
+    // --- Audio & Música ---
+    const val SAMPLE_RATE = 44100
+    const val AUDIO_BUFFER_SIZE = 4096
+    const val MUSIC_VOLUME = 0.4f
+    const val ATTACK_TIME = 10
+    const val DECAY_TIME = 80
+    const val SUSTAIN_LEVEL = 0.8f
+    const val RELEASE_TIME = 100
+    const val TEMPO_MIN = 100
+    const val TEMPO_DEFAULT = 120
+    const val TEMPO_INTENSE = 140
+
+    // Musical scales (C major for bright, adventurous feel)
+    val SCALE_C_MAJOR = intArrayOf(262, 294, 330, 349, 392, 440, 494, 523, 587, 659, 698, 784, 880, 988, 1047)
+
+    // Chord roots (for bass line)
+    val CHORD_C_MAJOR = intArrayOf(262, 330, 392)
+    val CHORD_F_MAJOR = intArrayOf(349, 440, 523)
+    val CHORD_G_MAJOR = intArrayOf(392, 494, 587)
+
+    // Note durations (in ms, at 120 BPM)
+    const val NOTE_WHOLE = 1000
+    const val NOTE_HALF = 500
+    const val NOTE_QUARTER = 250
+    const val NOTE_EIGHTH = 125
+
     // =========================================================================
     // COLORES (ARGB)
     // =========================================================================
